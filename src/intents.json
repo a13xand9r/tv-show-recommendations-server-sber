@@ -1,5 +1,65 @@
 {
   "intents": {
+    "/Следующий совет": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "следущий"
+        },
+        {
+          "type": "phrase",
+          "rule": "следующий сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "еще"
+        },
+        {
+          "type": "phrase",
+          "rule": "ещё"
+        },
+        {
+          "type": "phrase",
+          "rule": "следующая рекомендация"
+        }
+      ],
+      "variables": {}
+    },
+    "/Да": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "да"
+        },
+        {
+          "type": "phrase",
+          "rule": "давай"
+        }
+      ],
+      "variables": {}
+    },
+    "/Нет": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "нет"
+        },
+        {
+          "type": "phrase",
+          "rule": "не надо"
+        }
+      ],
+      "variables": {}
+    },
+    "/Сколько рекомендаций": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "сколько всего рекомендаций"
+        }
+      ],
+      "variables": {}
+    },
     "/Найти сериал": {
       "matchers": [
         {
@@ -25,6 +85,14 @@
         {
           "type": "phrase",
           "rule": "новый сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "найти другой сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "поискать другой сериал"
         }
       ],
       "variables": {}

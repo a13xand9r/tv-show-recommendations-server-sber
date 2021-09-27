@@ -1,6 +1,7 @@
 // import axios from 'axios'
 import { RecommendationsList } from './types'
 import MovieDB from 'node-themoviedb'
+require('dotenv').config()
 
 // const axiosMovie = axios.create({
 //   baseURL: 'https://api.themoviedb.org/3/',

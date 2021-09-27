@@ -8,7 +8,7 @@ import {
 } from '@salutejs/scenario'
 import { SaluteMemoryStorage } from '@salutejs/storage-adapter-memory'
 import { SmartAppBrainRecognizer } from '@salutejs/recognizer-smartapp-brain'
-import { userScenario } from './userScenario';
+import { intents, userScenario } from './userScenario';
 
 
 const systemScenario = createSystemScenario({
@@ -17,8 +17,8 @@ const systemScenario = createSystemScenario({
       res.setPronounceText('Я могу порекомендовать вам сериал на основе ваших предпочтений. Назовите сериал, который вам нравится, а я посоветую похожие.')
       res.appendBubble('Я могу порекомендовать вам сериал на основе ваших предпочтений. Назовите сериал, который вам нравится, а я посоветую похожие.')
     } else {
-      res.setPronounceText('Я могу порекомендовать тебе сериал на основе ваших предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
-      res.appendBubble('Я могу порекомендовать тебе сериал на основе ваших предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
+      res.setPronounceText('Я могу порекомендовать тебе сериал на основе твоих предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
+      res.appendBubble('Я могу порекомендовать тебе сериал на основе твоих предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
     }
     dispatch && dispatch(['searchTVShow'])
   },
@@ -29,8 +29,8 @@ const systemScenario = createSystemScenario({
 })
 
 const scenarioWalker = createScenarioWalker({
-  // recognizer: new SmartAppBrainRecognizer('0da03965-1326-48b8-9650-1c3e70920ffa'),
-  // intents,
+  recognizer: new SmartAppBrainRecognizer('6a0c0196-6441-4302-a2ff-9871b09eff3a'),
+  intents,
   userScenario,
   systemScenario
 })
