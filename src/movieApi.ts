@@ -6,7 +6,7 @@ import MovieDB from 'node-themoviedb'
 //   baseURL: 'https://api.themoviedb.org/3/',
 // });
 
-const mdb = new MovieDB('fb56ccc42db8618ed5a9adcb30677b5c', {language: 'ru'});
+const mdb = new MovieDB(process.env.MOVIE_API_KEY as string, {language: 'ru'});
 
 export const recommendTVShow = async (query: string) => {
   try{
@@ -15,7 +15,6 @@ export const recommendTVShow = async (query: string) => {
         query
       }
     })
-    console.log(foundTVShows.data)
     if (foundTVShows.data.results.length > 0){
       const TVShowId = foundTVShows.data.results[0].id
       const res = await mdb.tv.getRecommendations({
