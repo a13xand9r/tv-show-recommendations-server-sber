@@ -1,0 +1,34 @@
+{
+  "intents": {
+    "/Найти сериал": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "порекомендуй сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "найди сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "похожие сериалы"
+        },
+        {
+          "type": "phrase",
+          "rule": "похожий сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "другой сериал"
+        },
+        {
+          "type": "phrase",
+          "rule": "новый сериал"
+        }
+      ],
+      "variables": {}
+    }
+  },
+  "entities": {}
+}
