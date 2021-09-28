@@ -1,29 +1,33 @@
 import { createIntents, createMatchers, createUserScenario, SaluteHandler, SaluteRequest } from '@salutejs/scenario';
 import MovieDB from 'node-themoviedb';
 import model from './intents.json'
-import { recommendTVShow } from './movieApi';
-import { appendMovieCard } from './utils/utils';
+import { recommendTVShows, getGenres, findTVShow } from './movieApi';
+import { createMovieCard, sendNewTVShow } from './utils/utils';
 require('dotenv').config()
 export const intents = createIntents(model.intents)
 const { action, regexp, intent, text } = createMatchers<SaluteRequest , typeof intents>();
 
 export const newTVShowHandler: SaluteHandler = async ({req, res, session}) => {
-  const recommendations = await recommendTVShow(req.message.original_text)
-  if (recommendations?.results?.length){
-    session.recommendations = recommendations
-    session.currentItem = 1
-    session.userTVShow = req.message.original_text
-    res.appendCard(appendMovieCard(recommendations.results[0]))
-    res.appendSuggestions(['Найти другой сериал', 'Ещё'])
-    if (req.request.payload.character.appeal === 'official') {
-      res.setPronounceText(`Рекомендую ${recommendations.results[0].name}. ${recommendations.results[0].overview}. Скажите \"ещё\", чтобы посмотреть другую рекомендацию.`)
-    } else {
-      res.setPronounceText(`Рекомендую ${recommendations.results[0].name}. ${recommendations.results[0].overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
-    }
-  } else {
+  const foundTVShow = await findTVShow(req.message.original_text)
+  if (!foundTVShow) {
     res.setPronounceText('К сожалению, я не знаю таких сериалов.')
     res.appendBubble('К сожалению, я не знаю таких сериалов.')
     res.appendSuggestions(['Найти другой сериал'])
+  } else {
+    const recommendations = await recommendTVShows(foundTVShow?.results[0].id)
+    const genres = await getGenres()
+    if (recommendations?.results?.length) {
+      session.genres = genres
+      session.recommendations = recommendations
+      session.currentItem = 1
+      session.userTVShow = req.message.original_text
+      res.setAutoListening(true)
+      sendNewTVShow(req, res, recommendations.results[0], genres as MovieDB.Responses.Genre.Common)
+    } else {
+      session.recommendations = null
+      res.appendBubble('К сожалению, у меня нет рекомендаций для этого сериала.')
+      res.appendSuggestions(['Найти другой сериал'])
+    }
   }
 }
 
@@ -51,6 +55,13 @@ export const userScenario = createUserScenario({
       }
     }
   },
+  getGenres: {
+    match: () => false,
+    handle: async ({session}, dispatch) => {
+      session.genres = await getGenres()
+      dispatch && dispatch(['searchTVShow'])
+    }
+  },
   newTVShow: {
     match: intent('/Найти сериал', {confidence: 0.2}),
     handle: goToNewTVShowHandler
@@ -65,19 +76,17 @@ export const userScenario = createUserScenario({
   nextRecommendation: {
     match: intent('/Следующий совет', { confidence: 0.2 }),
     handle: ({ req, res, session }) => {
-      const { recommendations, currentItem } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, currentItem: number }
+      const { recommendations, currentItem, genres } = session as {
+        recommendations: MovieDB.Responses.TV.GetRecommendations | null,
+        genres: MovieDB.Responses.Genre.Common,
+        currentItem: number
+      }
       console.log('currentItem', currentItem)
-      const currentTVShow = recommendations.results[currentItem]
 
-      if (recommendations.total_results > currentItem) {
-        if (req.request.payload.character.appeal === 'official') {
-          res.setPronounceText(`Рекомендую ${currentTVShow.name}. ${currentTVShow.overview}. Скажите \"ещё\", чтобы посмотреть другую рекомендацию.`)
-        } else {
-          res.setPronounceText(`Рекомендую ${currentTVShow.name}. ${currentTVShow.overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
-        }
+      if (recommendations && recommendations.total_results > currentItem) {
+        const currentTVShow = recommendations.results[currentItem]
+        sendNewTVShow(req, res, currentTVShow, genres)
         session.currentItem = currentItem + 1
-        res.appendCard(appendMovieCard(currentTVShow))
-        res.appendSuggestions(['Найти другой сериал', 'Ещё'])
       } else {
         res.setPronounceText('У меня больше нет рекомендаций. Может попробуем другой сериал?')
         res.appendBubble('У меня больше нет рекомендаций. Может попробуем другой сериал?')
