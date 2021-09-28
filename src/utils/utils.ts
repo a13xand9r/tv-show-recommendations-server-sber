@@ -28,7 +28,8 @@ export const appendMovieCard = (movie: MovieDB.Objects.TVShow): Card => ({
     bottom_text: {
       text: movie.overview,
       typeface: 'footnote1',
-      text_color: 'secondary'
+      text_color: 'secondary',
+      max_lines: 10
     },
   }]
 })

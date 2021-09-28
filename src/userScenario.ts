@@ -66,6 +66,7 @@ export const userScenario = createUserScenario({
     match: intent('/Следующий совет', { confidence: 0.2 }),
     handle: ({ req, res, session }) => {
       const { recommendations, currentItem } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, currentItem: number }
+      console.log('currentItem', currentItem)
       const currentTVShow = recommendations.results[currentItem]
 
       if (recommendations.total_results > currentItem) {
