@@ -19,16 +19,17 @@ export const sendNewTVShow = async (
   req: SaluteRequest,
   res: SaluteResponse,
   movie: MovieDB.Objects.TVShow,
-  genres: MovieDB.Responses.Genre.Common
+  genres: MovieDB.Responses.Genre.Common,
+  initialPhrase: string = ''
 ) => {
   res.appendSuggestions(['Найти другой сериал', 'Ещё', 'Сколько всего рекомендаций?'])
   let recommendationText: string[] = []
   if (req.request.payload.character.appeal === 'official') {
     recommendationText = ['Рекомендую', 'Могу порекомендовать', 'Можете посмотреть']
-    res.setPronounceText(`${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажите \"ещё\", чтобы посмотреть другую рекомендацию.`)
+    res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажите \"ещё\", чтобы посмотреть другую рекомендацию.`)
   } else {
     recommendationText = ['Рекомендую', 'Могу порекомендовать', 'Можешь посмотреть']
-    res.setPronounceText(`${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
+    res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
   }
   const movieGenres = findGenres(genres, movie.genre_ids)
   res.appendCommand({

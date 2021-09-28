@@ -21,6 +21,10 @@
         {
           "type": "phrase",
           "rule": "следующая рекомендация"
+        },
+        {
+          "type": "phrase",
+          "rule": "дальше"
         }
       ],
       "variables": {}

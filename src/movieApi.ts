@@ -16,7 +16,6 @@ export const findTVShow = async (query: string) => {
         query
       }
     })
-    console.log('foundTVShows', foundTVShows.data.results[0])
     if (foundTVShows.data.results.length > 0){
       return foundTVShows.data
     }

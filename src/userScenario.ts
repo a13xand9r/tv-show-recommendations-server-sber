@@ -9,23 +9,30 @@ const { action, regexp, intent, text } = createMatchers<SaluteRequest , typeof i
 
 export const newTVShowHandler: SaluteHandler = async ({req, res, session}) => {
   const foundTVShow = await findTVShow(req.message.original_text)
-  if (!foundTVShow) {
+  if (!foundTVShow || foundTVShow.total_results === 0) {
     res.setPronounceText('К сожалению, я не знаю таких сериалов.')
     res.appendBubble('К сожалению, я не знаю таких сериалов.')
     res.appendSuggestions(['Найти другой сериал'])
   } else {
     const recommendations = await recommendTVShows(foundTVShow?.results[0].id)
     const genres = await getGenres()
-    if (recommendations?.results?.length) {
+    if (recommendations && recommendations?.results?.length > 0) {
       session.genres = genres
       session.recommendations = recommendations
       session.currentItem = 1
       session.userTVShow = req.message.original_text
       res.setAutoListening(true)
-      sendNewTVShow(req, res, recommendations.results[0], genres as MovieDB.Responses.Genre.Common)
+      sendNewTVShow(
+        req,
+        res,
+        recommendations.results[0],
+        genres as MovieDB.Responses.Genre.Common,
+        `Рекомендации для сериала ${foundTVShow.results[0].name}. `
+      )
     } else {
       session.recommendations = null
       res.appendBubble('К сожалению, у меня нет рекомендаций для этого сериала.')
+      res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала.')
       res.appendSuggestions(['Найти другой сериал'])
     }
   }
@@ -42,6 +49,12 @@ export const goToNewTVShowHandler: SaluteHandler = ({req, res}, dispatch) => {
   dispatch && dispatch(['searchTVShow'])
 }
 
+export const howManyRecommendationsHandler: SaluteHandler = ({res, session}) => {
+  const { recommendations, userTVShow } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, userTVShow: string }
+  res.setPronounceText(`Всего ${recommendations.total_results} рекомендаций.`)
+  res.appendSuggestions(['Найти другой сериал', 'Ещё'])
+}
+
 export const userScenario = createUserScenario({
   searchTVShow: {
     match: () => false,
@@ -51,7 +64,13 @@ export const userScenario = createUserScenario({
     children: {
       TVShowName: {
         match: (req) => !!req.message.original_text,
-        handle: newTVShowHandler
+        handle: newTVShowHandler,
+        children: {
+          howManyRecommendations: {
+            match: intent('/Сколько рекомендаций', {confidence: 0.2}),
+            handle: howManyRecommendationsHandler
+          }
+        }
       }
     }
   },
@@ -65,13 +84,6 @@ export const userScenario = createUserScenario({
   newTVShow: {
     match: intent('/Найти сериал', {confidence: 0.2}),
     handle: goToNewTVShowHandler
-  },
-  howManyRecommendations: {
-    match: intent('/Сколько рекомендаций', {confidence: 0.2}),
-    handle: ({res, session}) => {
-      const { recommendations, userTVShow } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, userTVShow: string }
-      res.setPronounceText(`Всего ${recommendations.total_results} рекомендаций.`)
-    }
   },
   nextRecommendation: {
     match: intent('/Следующий совет', { confidence: 0.2 }),
@@ -95,6 +107,10 @@ export const userScenario = createUserScenario({
       res.setAutoListening(true)
     },
     children: {
+      howManyRecommendations: {
+        match: intent('/Сколько рекомендаций', {confidence: 0.2}),
+        handle: howManyRecommendationsHandler
+      },
       yes: {
         match: intent('/Да', { confidence: 0.2 }),
         handle: goToNewTVShowHandler
