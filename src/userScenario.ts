@@ -39,8 +39,6 @@ export const goToNewTVShowHandler: SaluteHandler = ({req, res, session}, dispatc
     res.setPronounceText('Какой сериал тебе нравится?')
     res.appendBubble('Какой сериал тебе нравится?')
   }
-  session.foundTVShowsIndex = 0
-  session.foundTVShows = null
   dispatch && dispatch(['searchTVShow'])
 }
 
@@ -53,7 +51,9 @@ export const howManyRecommendationsHandler: SaluteHandler = ({res, session}) => 
 export const userScenario = createUserScenario({
   searchTVShow: {
     match: () => false,
-    handle: ({res}) => {
+    handle: ({res, session}) => {
+      session.foundTVShowsIndex = 0
+      session.foundTVShows = null
       res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
       res.setAutoListening(true)
     },
