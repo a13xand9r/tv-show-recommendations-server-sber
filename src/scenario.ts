@@ -33,8 +33,8 @@ const systemScenario = createSystemScenario({
         res.appendBubble('Скажите \"Ещё\" для следующей рекомендации или скажите \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
         // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
-        res.setPronounceText('Назовите сериала чтобы узнать рекомендации на основе ваших предпочтений.')
-        res.appendBubble('Назовите сериала чтобы узнать рекомендации на основе ваших предпочтений.')
+        res.setPronounceText('Назовите сериал чтобы узнать рекомендации на основе ваших предпочтений.')
+        res.appendBubble('Назовите сериал чтобы узнать рекомендации на основе ваших предпочтений.')
         dispatch && dispatch(['searchTVShow'])
       }
     } else{
