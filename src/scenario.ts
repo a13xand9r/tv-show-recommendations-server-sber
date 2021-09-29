@@ -9,6 +9,8 @@ import {
 import { SaluteMemoryStorage } from '@salutejs/storage-adapter-memory'
 import { SmartAppBrainRecognizer } from '@salutejs/recognizer-smartapp-brain'
 import { intents, userScenario } from './userScenario';
+import { getRandomFromArray } from './utils/utils';
+import { tvShowsSuggestions } from './utils/constants';
 
 
 const systemScenario = createSystemScenario({
@@ -22,22 +24,28 @@ const systemScenario = createSystemScenario({
     }
     dispatch && dispatch(['searchTVShow'])
   },
-  NO_MATCH: ({ req, res, session }) => {
+  NO_MATCH: ({ req, res, session }, dispatch) => {
     if (req.request.payload.character.appeal === 'official'){
       if (session.recommendations){
+        res.appendSuggestions(['Найти другой сериал', 'Ещё'])
         res.setPronounceText('Скажите \"Ещё\" для следующей рекомендации или скажите \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
         res.appendBubble('Скажите \"Ещё\" для следующей рекомендации или скажите \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
+        res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
         res.setPronounceText('Скажите \"Порекомендуй сериал\" чтобы узнать рекомендации на основе ваших предпочтений.')
         res.appendBubble('Скажите \"Порекомендуй сериал\" чтобы узнать рекомендации на основе ваших предпочтений.')
+        dispatch && dispatch(['searchTVShow'])
       }
     } else{
       if (session.recommendations){
+        res.appendSuggestions(['Найти другой сериал', 'Ещё'])
         res.setPronounceText('Скажи \"Ещё\" для следующей рекомендации или скажи \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
         res.appendBubble('Скажи \"Ещё\" для следующей рекомендации или скажи \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
+        res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
         res.setPronounceText('Скажи \"Порекомендуй сериал\" чтобы узнать рекомендации на основе твоих предпочтений.')
         res.appendBubble('Скажи \"Порекомендуй сериал\" чтобы узнать рекомендации на основе твоих предпочтений.')
+        dispatch && dispatch(['searchTVShow'])
       }
     }
   }

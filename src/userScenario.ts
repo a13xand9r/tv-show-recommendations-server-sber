@@ -2,6 +2,7 @@ import { createIntents, createMatchers, createUserScenario, SaluteHandler, Salut
 import MovieDB from 'node-themoviedb';
 import model from './intents.json'
 import { recommendTVShows, getGenres, findTVShow } from './movieApi';
+import { tvShowsSuggestions } from './utils/constants';
 import { createMovieCard, getRandomFromArray, sendNewTVShow } from './utils/utils';
 require('dotenv').config()
 export const intents = createIntents(model.intents)
@@ -9,11 +10,10 @@ const { action, regexp, intent, text } = createMatchers<SaluteRequest , typeof i
 
 export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispatch) => {
   const foundTVShow = await findTVShow(req.message.original_text)
-  const suggestions = ['Игра престолов', 'Во все тяжкие', 'Элита', 'Карточный домик', 'Аватар: легенда об Аанге']
   if (!foundTVShow || foundTVShow.total_results === 0) {
-    res.setPronounceText('К сожалению, я не знаю таких сериалов.')
-    res.appendBubble('К сожалению, я не знаю таких сериалов.')
-    res.appendSuggestions([getRandomFromArray(suggestions)])
+    res.setPronounceText('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
+    res.appendBubble('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
+    res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
     dispatch && dispatch(['searchTVShow'])
   } else {
     const recommendations = await recommendTVShows(foundTVShow?.results[0].id)
@@ -33,9 +33,9 @@ export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispa
       )
     } else {
       session.recommendations = null
-      res.appendBubble('К сожалению, у меня нет рекомендаций для этого сериала.')
-      res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала.')
-      res.appendSuggestions([getRandomFromArray(suggestions)])
+      res.appendBubble('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
+      res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
+      res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
       dispatch && dispatch(['searchTVShow'])
     }
   }
@@ -105,8 +105,8 @@ export const userScenario = createUserScenario({
       } else {
         res.setPronounceText('У меня больше нет рекомендаций. Может попробуем другой сериал?')
         res.appendBubble('У меня больше нет рекомендаций. Может попробуем другой сериал?')
-        const suggestions = ['Игра престолов', 'Во все тяжкие', 'Элита', 'Карточный домик', 'Аватар: легенда об Аанге']
-        res.appendSuggestions([getRandomFromArray(suggestions)])
+        res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
+        session.recommendations = null
         dispatch && dispatch(['searchTVShow'])
       }
       res.setAutoListening(true)
