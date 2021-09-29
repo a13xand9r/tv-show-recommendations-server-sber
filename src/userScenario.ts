@@ -3,45 +3,35 @@ import MovieDB from 'node-themoviedb';
 import model from './intents.json'
 import { recommendTVShows, getGenres, findTVShow } from './movieApi';
 import { tvShowsSuggestions } from './utils/constants';
-import { createMovieCard, getRandomFromArray, sendNewTVShow } from './utils/utils';
+import { createMovieCard, sendNewTVShow, sendFirstRecommendation, getRandomFromArray } from './utils/utils';
 require('dotenv').config()
 export const intents = createIntents(model.intents)
 const { action, regexp, intent, text } = createMatchers<SaluteRequest , typeof intents>();
 
 export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispatch) => {
-  const foundTVShow = await findTVShow(req.message.original_text)
-  if (!foundTVShow || foundTVShow.total_results === 0) {
+  let {foundTVShows, foundTVShowsIndex} = session as {
+    foundTVShows: MovieDB.Responses.Search.TVShows | null | undefined
+    foundTVShowsIndex: number | undefined
+  }
+  if (!foundTVShows){
+    foundTVShows = await findTVShow(req.message.original_text)
+    session.foundTVShowsIndex = 0
+    session.foundTVShows = foundTVShows
+  }
+  if (!foundTVShows || foundTVShows.total_results === 0) {
     res.setPronounceText('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
     res.appendBubble('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
-    // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
     dispatch && dispatch(['searchTVShow'])
   } else {
-    const recommendations = await recommendTVShows(foundTVShow?.results[0].id)
-    const genres = await getGenres()
-    if (recommendations && recommendations?.results?.length > 0) {
-      session.genres = genres
-      session.recommendations = recommendations
-      session.currentItem = 1
-      session.userTVShow = req.message.original_text
-      res.setAutoListening(true)
-      sendNewTVShow(
-        req,
-        res,
-        recommendations.results[0],
-        genres as MovieDB.Responses.Genre.Common,
-        `Рекомендации для сериала ${foundTVShow.results[0].name}. `
-      )
+    if (foundTVShows?.results[foundTVShowsIndex ?? 0]){
+      await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
     } else {
-      session.recommendations = null
-      res.appendBubble('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
-      res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
-      // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
-      dispatch && dispatch(['searchTVShow'])
+      res.setPronounceText('У меня больше нет сериалов по этому запросу.')
     }
   }
 }
 
-export const goToNewTVShowHandler: SaluteHandler = ({req, res}, dispatch) => {
+export const goToNewTVShowHandler: SaluteHandler = ({req, res, session}, dispatch) => {
   if (req.request.payload.character.appeal === 'official'){
     res.setPronounceText('Какой сериал вам нравится?')
     res.appendBubble('Какой сериал вам нравится?')
@@ -49,12 +39,13 @@ export const goToNewTVShowHandler: SaluteHandler = ({req, res}, dispatch) => {
     res.setPronounceText('Какой сериал тебе нравится?')
     res.appendBubble('Какой сериал тебе нравится?')
   }
+  session.foundTVShowsIndex = 0
   dispatch && dispatch(['searchTVShow'])
 }
 
 export const howManyRecommendationsHandler: SaluteHandler = ({res, session}) => {
   const { recommendations, userTVShow } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, userTVShow: string }
-  res.setPronounceText(`Всего ${recommendations.total_results} рекомендаций.`)
+  res.setPronounceText(`Всего ${recommendations.results.length} рекомендаций.`)
   res.appendSuggestions(['Найти другой сериал', 'Ещё'])
 }
 
@@ -73,8 +64,24 @@ export const userScenario = createUserScenario({
           howManyRecommendations: {
             match: intent('/Сколько рекомендаций', {confidence: 0.2}),
             handle: howManyRecommendationsHandler
-          }
+          },
         }
+      }
+    }
+  },
+  otherTVShow: {
+    match: intent('/Не тот сериал', {confidence: 0.5}),
+    handle: async ({req, res, session}, dispatch) => {
+      session.foundTVShowsIndex = Number(session.foundTVShowsIndex) + 1
+      let {foundTVShows, foundTVShowsIndex} = session as {
+        foundTVShows: MovieDB.Responses.Search.TVShows | null | undefined
+        foundTVShowsIndex: number
+      }
+      if (foundTVShows?.results[foundTVShowsIndex ?? 0]){
+        await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
+      } else {
+        res.setPronounceText('У меня больше нет сериалов по этому запросу.')
+        res.appendSuggestions(['Найти другой сериал'])
       }
     }
   },
@@ -106,7 +113,6 @@ export const userScenario = createUserScenario({
       } else {
         res.setPronounceText('У меня больше нет рекомендаций. Может попробуем другой сериал?')
         res.appendBubble('У меня больше нет рекомендаций. Может попробуем другой сериал?')
-        // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
         session.recommendations = null
         dispatch && dispatch(['searchTVShow'])
       }

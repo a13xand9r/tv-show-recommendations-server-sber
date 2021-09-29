@@ -1,5 +1,6 @@
 import { Card, SaluteResponse, SaluteRequest } from '@salutejs/scenario';
 import MovieDB from 'node-themoviedb';
+import { getGenres, recommendTVShows } from '../movieApi';
 
 export function getRandomFromArray<T>(arr: T[]): T {
   return arr[Math.floor(arr.length * Math.random())]
@@ -22,7 +23,11 @@ export const sendNewTVShow = async (
   genres: MovieDB.Responses.Genre.Common,
   initialPhrase: string = ''
 ) => {
-  res.appendSuggestions(['Найти другой сериал', 'Ещё', 'Сколько всего рекомендаций?'])
+  if (initialPhrase){
+    res.appendSuggestions(['Найти другой сериал', 'Ещё', 'Не тот сериал'])
+  } else{
+    res.appendSuggestions(['Найти другой сериал', 'Ещё', 'Сколько всего рекомендаций?'])
+  }
   let recommendationText: string[] = []
   if (req.request.payload.character.appeal === 'official') {
     recommendationText = ['Рекомендую', 'Могу порекомендовать', 'Можете посмотреть']
@@ -32,6 +37,7 @@ export const sendNewTVShow = async (
     res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
   }
   const movieGenres = findGenres(genres, movie.genre_ids)
+  console.log('appendCommand')
   res.appendCommand({
     type: 'SET_TV_SHOW',
     tvShow: {
@@ -101,3 +107,40 @@ export const createMovieCard = (movie: MovieDB.Objects.TVShow): Card => ({
     },
   }]
 })
+
+export const sendFirstRecommendation = async (
+  foundTVShows: MovieDB.Responses.Search.TVShows,
+  foundTVShowsIndex: number | undefined,
+  session: Record<string, unknown>,
+  req: SaluteRequest,
+  res: SaluteResponse,
+  dispatch: ((path: string[]) => void) | undefined
+) => {
+  // console.log(foundTVShows?.results[foundTVShowsIndex ?? 0].name)
+  const recommendations = await recommendTVShows(foundTVShows?.results[foundTVShowsIndex ?? 0].id)
+  console.log(recommendations?.results.map(item => item.name).join(', '))
+  const genres = await getGenres()
+  if (recommendations && recommendations?.results?.length > 0) {
+    console.log('inside rec')
+    session.genres = genres
+    session.foundTVShow = foundTVShows
+    session.recommendations = recommendations
+    session.currentItem = 1
+    session.userTVShow = req.message.original_text
+    res.setAutoListening(true)
+    sendNewTVShow(
+      req,
+      res,
+      recommendations.results[0],
+      genres as MovieDB.Responses.Genre.Common,
+      `Рекомендации для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. `
+    )
+  } else {
+    session.recommendations = null
+    res.appendBubble(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем другой сериал?`)
+    res.setPronounceText(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем другой сериал?`)
+    res.appendSuggestions(['Не тот сериал', 'Найти другой сериал'])
+    // res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
+    // dispatch && dispatch(['searchTVShow'])
+  }
+}
