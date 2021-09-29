@@ -137,8 +137,8 @@ export const sendFirstRecommendation = async (
     )
   } else {
     session.recommendations = null
-    res.appendBubble(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем другой сериал?`)
-    res.setPronounceText(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем другой сериал?`)
+    res.appendBubble(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем найти другой сериал?`)
+    res.setPronounceText(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем найти другой сериал?`)
     res.appendSuggestions(['Не тот сериал', 'Найти другой сериал'])
     // res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
     // dispatch && dispatch(['searchTVShow'])

@@ -40,6 +40,7 @@ export const goToNewTVShowHandler: SaluteHandler = ({req, res, session}, dispatc
     res.appendBubble('Какой сериал тебе нравится?')
   }
   session.foundTVShowsIndex = 0
+  session.foundTVShows = null
   dispatch && dispatch(['searchTVShow'])
 }
 
