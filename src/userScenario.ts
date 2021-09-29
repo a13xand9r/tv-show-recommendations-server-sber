@@ -81,8 +81,9 @@ export const userScenario = createUserScenario({
       if (foundTVShows?.results[foundTVShowsIndex ?? 0]){
         await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
       } else {
-        res.setPronounceText('У меня больше нет сериалов по этому запросу.')
-        res.appendSuggestions(['Найти другой сериал'])
+        res.setPronounceText('У меня больше нет сериалов по этому запросу. Можем найти другой сериал')
+        // res.appendSuggestions(['Найти другой сериал'])
+        dispatch && dispatch(['searchTVShow'])
       }
     }
   },
