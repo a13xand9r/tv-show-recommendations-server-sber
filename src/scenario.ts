@@ -33,8 +33,8 @@ const systemScenario = createSystemScenario({
         res.appendBubble('Скажите \"Ещё\" для следующей рекомендации или скажите \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
         // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
-        res.setPronounceText('Скажите \"Порекомендуй сериал\" чтобы узнать рекомендации на основе ваших предпочтений.')
-        res.appendBubble('Скажите \"Порекомендуй сериал\" чтобы узнать рекомендации на основе ваших предпочтений.')
+        res.setPronounceText('Назовите сериала чтобы узнать рекомендации на основе ваших предпочтений.')
+        res.appendBubble('Назовите сериала чтобы узнать рекомендации на основе ваших предпочтений.')
         dispatch && dispatch(['searchTVShow'])
       }
     } else{
@@ -44,8 +44,8 @@ const systemScenario = createSystemScenario({
         res.appendBubble('Скажи \"Ещё\" для следующей рекомендации или скажи \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
         // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
-        res.setPronounceText('Скажи \"Порекомендуй сериал\" чтобы узнать рекомендации на основе твоих предпочтений.')
-        res.appendBubble('Скажи \"Порекомендуй сериал\" чтобы узнать рекомендации на основе твоих предпочтений.')
+        res.setPronounceText('Назови сериал чтобы узнать рекомендации на основе твоих предпочтений.')
+        res.appendBubble('Назови сериал чтобы узнать рекомендации на основе твоих предпочтений.')
         dispatch && dispatch(['searchTVShow'])
       }
     }
