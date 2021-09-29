@@ -13,7 +13,7 @@ export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispa
   if (!foundTVShow || foundTVShow.total_results === 0) {
     res.setPronounceText('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
     res.appendBubble('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
-    res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
+    // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
     dispatch && dispatch(['searchTVShow'])
   } else {
     const recommendations = await recommendTVShows(foundTVShow?.results[0].id)
@@ -35,7 +35,7 @@ export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispa
       session.recommendations = null
       res.appendBubble('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
       res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
-      res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
+      // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
       dispatch && dispatch(['searchTVShow'])
     }
   }
@@ -62,6 +62,7 @@ export const userScenario = createUserScenario({
   searchTVShow: {
     match: () => false,
     handle: ({res}) => {
+      res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
       res.setAutoListening(true)
     },
     children: {
@@ -105,7 +106,7 @@ export const userScenario = createUserScenario({
       } else {
         res.setPronounceText('У меня больше нет рекомендаций. Может попробуем другой сериал?')
         res.appendBubble('У меня больше нет рекомендаций. Может попробуем другой сериал?')
-        res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
+        // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
         session.recommendations = null
         dispatch && dispatch(['searchTVShow'])
       }

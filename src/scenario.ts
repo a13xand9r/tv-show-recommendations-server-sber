@@ -22,6 +22,7 @@ const systemScenario = createSystemScenario({
       res.setPronounceText('Я могу порекомендовать тебе сериал на основе твоих предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
       res.appendBubble('Я могу порекомендовать тебе сериал на основе твоих предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
     }
+    // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
     dispatch && dispatch(['searchTVShow'])
   },
   NO_MATCH: ({ req, res, session }, dispatch) => {
@@ -31,7 +32,7 @@ const systemScenario = createSystemScenario({
         res.setPronounceText('Скажите \"Ещё\" для следующей рекомендации или скажите \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
         res.appendBubble('Скажите \"Ещё\" для следующей рекомендации или скажите \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
-        res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
+        // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
         res.setPronounceText('Скажите \"Порекомендуй сериал\" чтобы узнать рекомендации на основе ваших предпочтений.')
         res.appendBubble('Скажите \"Порекомендуй сериал\" чтобы узнать рекомендации на основе ваших предпочтений.')
         dispatch && dispatch(['searchTVShow'])
@@ -42,7 +43,7 @@ const systemScenario = createSystemScenario({
         res.setPronounceText('Скажи \"Ещё\" для следующей рекомендации или скажи \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
         res.appendBubble('Скажи \"Ещё\" для следующей рекомендации или скажи \"Другой сериал\" чтобы узнать рекомендации на основе другого сериала.')
       } else{
-        res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
+        // res.appendSuggestions([getRandomFromArray(tvShowsSuggestions)])
         res.setPronounceText('Скажи \"Порекомендуй сериал\" чтобы узнать рекомендации на основе твоих предпочтений.')
         res.appendBubble('Скажи \"Порекомендуй сериал\" чтобы узнать рекомендации на основе твоих предпочтений.')
         dispatch && dispatch(['searchTVShow'])
