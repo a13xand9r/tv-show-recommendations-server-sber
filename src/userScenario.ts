@@ -32,7 +32,6 @@ export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispa
         await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
       } else {
         res.setPronounceText('У меня больше нет сериалов по этому запросу.')
-        res.appendBubble('У меня больше нет сериалов по этому запросу.')
       }
     }
   }

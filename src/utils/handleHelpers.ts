@@ -1,7 +1,7 @@
 import { Card, SaluteRequest, SaluteResponse } from '@salutejs/scenario'
 import MovieDB from 'node-themoviedb'
 import { getGenres, recommendTVShows } from '../movieApi'
-import { fixTVShowName, getRandomFromArray } from './utils'
+import { findFirstTVShowWithRecommendation, fixTVShowName, getRandomFromArray } from './utils'
 
 export const findGenres = (genres: MovieDB.Responses.Genre.Common, genreIds: number[]) => {
   return genres.genres.filter(genre => {
@@ -112,8 +112,11 @@ export const sendFirstRecommendation = async (
   res: SaluteResponse,
   dispatch: ((path: string[]) => void) | undefined
 ) => {
-  const recommendations = await recommendTVShows(foundTVShows?.results[foundTVShowsIndex ?? 0].id)
+  const {recommendations, foundTVShowsIndexFirst} = await findFirstTVShowWithRecommendation(foundTVShows, foundTVShowsIndex)//recommendTVShows(foundTVShows?.results[foundTVShowsIndex ?? 0].id)
   console.log(recommendations?.results.map(item => item.name).join(', '))
+  console.log('foundTVShowsIndexFirst', foundTVShowsIndexFirst)
+  session.foundTVShowsIndex = foundTVShowsIndexFirst
+  console.log('Number(session.foundTVShowsIndex)', Number(session.foundTVShowsIndex))
   const genres = await getGenres()
   if (recommendations && recommendations?.results?.length > 0) {
     session.genres = genres
@@ -127,14 +130,14 @@ export const sendFirstRecommendation = async (
       res,
       recommendations.results[0],
       genres as MovieDB.Responses.Genre.Common,
-      `Рекомендации для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. `
+      `Рекомендации для сериала ${foundTVShows.results[Number(session.foundTVShowsIndex) ?? 0].name}. `
     )
   } else {
     session.recommendations = null
-    res.appendBubble(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем найти другой сериал?`)
-    res.setPronounceText(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[foundTVShowsIndex ?? 0].name}. Может это не тот сериал? Или попробуем найти другой сериал?`)
-    res.appendSuggestions(['Не тот сериал', 'Найти другой сериал'])
+    res.setPronounceText('У меня больше нет сериалов по этому запросу. Может попробуем найти другой сериал?')
+    // res.setPronounceText(`К сожалению, у меня нет рекомендаций для сериала ${foundTVShows.results[Number(session.foundTVShowsIndex) ?? 0].name}. Может это не тот сериал? Или попробуем найти другой сериал?`)
+    // res.appendSuggestions(['Не тот сериал', 'Найти другой сериал'])
     // res.setPronounceText('К сожалению, у меня нет рекомендаций для этого сериала. Может попробуем другой сериал?')
-    // dispatch && dispatch(['searchTVShow'])
+    dispatch && dispatch(['searchTVShow'])
   }
 }
