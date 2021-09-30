@@ -15,5 +15,5 @@ app.listen(PORT, () => {
 })
 
 app.get('/', (_, res) => {
-  res.status(200).send('Akinator server App')
+  res.status(200).send('TV-Show recommendation server App')
 })

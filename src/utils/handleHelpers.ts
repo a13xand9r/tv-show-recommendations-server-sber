@@ -1,7 +1,7 @@
 import { Card, SaluteRequest, SaluteResponse } from '@salutejs/scenario'
 import MovieDB from 'node-themoviedb'
 import { getGenres, recommendTVShows } from '../movieApi'
-import { getRandomFromArray } from './utils'
+import { fixTVShowName, getRandomFromArray } from './utils'
 
 export const findGenres = (genres: MovieDB.Responses.Genre.Common, genreIds: number[]) => {
   return genres.genres.filter(genre => {
@@ -28,17 +28,16 @@ export const sendNewTVShow = async (
   let recommendationText: string[] = []
   if (req.request.payload.character.appeal === 'official') {
     recommendationText = ['Рекомендую', 'Могу порекомендовать', 'Можете посмотреть']
-    res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажите \"ещё\", чтобы посмотреть другую рекомендацию.`)
+    res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${fixTVShowName(movie.name)}. ${movie.overview}. Скажите \"ещё\", чтобы посмотреть другую рекомендацию.`)
   } else {
     recommendationText = ['Рекомендую', 'Могу порекомендовать', 'Можешь посмотреть']
-    res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${movie.name}. ${movie.overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
+    res.setPronounceText(`${initialPhrase}${getRandomFromArray(recommendationText)} ${fixTVShowName(movie.name)}. ${movie.overview}. Скажи \"ещё\", чтобы посмотреть другую рекомендацию.`)
   }
   const movieGenres = findGenres(genres, movie.genre_ids)
-  console.log('appendCommand')
   res.appendCommand({
     type: 'SET_TV_SHOW',
     tvShow: {
-      name: movie.name,
+      name: fixTVShowName(movie.name),
       img: `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`,
       description: movie.overview,
       year: new Date(movie.first_air_date).getFullYear(),
@@ -91,7 +90,7 @@ export const createMovieCard = (movie: MovieDB.Objects.TVShow): Card => ({
       right: '5x',
     },
     top_text: {
-      text: movie.name,
+      text: fixTVShowName(movie.name),
       typeface: 'title1',
       text_color: 'default',
       max_lines: 2
@@ -113,12 +112,10 @@ export const sendFirstRecommendation = async (
   res: SaluteResponse,
   dispatch: ((path: string[]) => void) | undefined
 ) => {
-  // console.log(foundTVShows?.results[foundTVShowsIndex ?? 0].name)
   const recommendations = await recommendTVShows(foundTVShows?.results[foundTVShowsIndex ?? 0].id)
   console.log(recommendations?.results.map(item => item.name).join(', '))
   const genres = await getGenres()
   if (recommendations && recommendations?.results?.length > 0) {
-    console.log('inside rec')
     session.genres = genres
     session.foundTVShow = foundTVShows
     session.recommendations = recommendations

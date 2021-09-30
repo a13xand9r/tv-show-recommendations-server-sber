@@ -22,6 +22,7 @@ const systemScenario = createSystemScenario({
       res.setPronounceText('Я могу порекомендовать тебе сериал на основе твоих предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
       res.appendBubble('Я могу порекомендовать тебе сериал на основе твоих предпочтений. Назови сериал, который тебе нравится, а я посоветую похожие.')
     }
+    res.appendSuggestions(['Что ты умеешь?'])
     dispatch && dispatch(['searchTVShow'])
   },
   NO_MATCH: ({ req, res, session }, dispatch) => {

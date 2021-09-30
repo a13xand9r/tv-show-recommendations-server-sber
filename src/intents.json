@@ -77,6 +77,19 @@
       ],
       "variables": {}
     },
+    "/Помощь": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "Что ты умеешь"
+        },
+        {
+          "type": "phrase",
+          "rule": "помощь"
+        }
+      ],
+      "variables": {}
+    },
     "/Найти сериал": {
       "matchers": [
         {

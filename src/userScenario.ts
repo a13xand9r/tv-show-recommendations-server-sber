@@ -14,20 +14,25 @@ export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispa
     foundTVShows: MovieDB.Responses.Search.TVShows | null | undefined
     foundTVShowsIndex: number | undefined
   }
-  if (!foundTVShows){
-    foundTVShows = await findTVShow(req.message.original_text)
-    session.foundTVShowsIndex = 0
-    session.foundTVShows = foundTVShows
-  }
-  if (!foundTVShows || foundTVShows.total_results === 0) {
-    res.setPronounceText('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
-    res.appendBubble('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
-    dispatch && dispatch(['searchTVShow'])
+  if(req.message.original_text.toLocaleLowerCase().includes('что ты умеешь')){
+    console.log('что ты умеешь')
+    dispatch && dispatch(['help'])
   } else {
-    if (foundTVShows?.results[foundTVShowsIndex ?? 0]){
-      await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
+    if (!foundTVShows){
+      foundTVShows = await findTVShow(req.message.original_text)
+      session.foundTVShowsIndex = 0
+      session.foundTVShows = foundTVShows
+    }
+    if (!foundTVShows || foundTVShows.total_results === 0) {
+      res.setPronounceText('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
+      res.appendBubble('К сожалению, я не знаю таких сериалов. Может попробуем другой сериал?')
+      dispatch && dispatch(['searchTVShow'])
     } else {
-      res.setPronounceText('У меня больше нет сериалов по этому запросу.')
+      if (foundTVShows?.results[foundTVShowsIndex ?? 0]){
+        await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
+      } else {
+        res.setPronounceText('У меня больше нет сериалов по этому запросу.')
+      }
     }
   }
 }
@@ -99,6 +104,17 @@ export const userScenario = createUserScenario({
     match: intent('/Найти сериал', {confidence: 0.2}),
     handle: goToNewTVShowHandler
   },
+  help: {
+    match: intent('/Помощь', {confidence: 0.2}),
+    handle: ({req, res}) => {
+      if (req.request.payload.character.appeal === 'official') {
+        res.setPronounceText(`Я могу порекомендовать сериал на основе ваших предпочтений. Можете сказать \"Порекомендуй сериал\", чтобы посмотреть рекомендации. Дальше можете сказать \"Не тот сериал\", если это не тот что вы искали или скажите \"Ещё\" для следующей рекомендации. Также можно узнать сколько всего рекомендаций сказав соответствующую фразу.`)
+      } else {
+        res.setPronounceText(`Я могу порекомендовать сериал на основе твоих предпочтений. Можешь сказать \"Порекомендуй сериал\", чтобы посмотреть рекомендации. Дальше можешь сказать \"Не тот сериал\", если это не тот что ты искал или скажи \"Ещё\" для следующей рекомендации. Также можно узнать сколько всего рекомендаций сказав соответствующую фразу.`)
+      }
+      res.appendSuggestions(['Порекомендуй сериал'])
+    }
+  },
   nextRecommendation: {
     match: intent('/Следующий совет', { confidence: 0.2 }),
     handle: ({ req, res, session }, dispatch) => {
@@ -107,7 +123,6 @@ export const userScenario = createUserScenario({
         genres: MovieDB.Responses.Genre.Common,
         currentItem: number
       }
-      console.log('currentItem', currentItem)
 
       if (recommendations && recommendations.total_results > currentItem) {
         const currentTVShow = recommendations.results[currentItem]
