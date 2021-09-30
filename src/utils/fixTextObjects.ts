@@ -8,4 +8,5 @@ export const pluralization = {
 export const tvShowName = {
   'Our Russia': 'Наша Russia',
   'Interns': 'Интерны',
+  'Happy Together': 'Счастливы вместе'
 }

@@ -32,6 +32,7 @@ export const newTVShowHandler: SaluteHandler = async ({req, res, session}, dispa
         await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
       } else {
         res.setPronounceText('У меня больше нет сериалов по этому запросу.')
+        res.appendBubble('У меня больше нет сериалов по этому запросу.')
       }
     }
   }
@@ -51,6 +52,7 @@ export const goToNewTVShowHandler: SaluteHandler = ({req, res, session}, dispatc
 export const howManyRecommendationsHandler: SaluteHandler = ({res, session}) => {
   const { recommendations, userTVShow } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, userTVShow: string }
   res.setPronounceText(fixPluralization(`Всего ${recommendations.results.length} рекомендаций.`))
+  res.appendBubble(fixPluralization(`Всего ${recommendations.results.length} рекомендаций.`))
   res.appendSuggestions(['Найти другой сериал', 'Ещё'])
 }
 
@@ -88,6 +90,7 @@ export const userScenario = createUserScenario({
         await sendFirstRecommendation(foundTVShows, foundTVShowsIndex, session, req, res, dispatch)
       } else {
         res.setPronounceText('У меня больше нет сериалов по этому запросу. Можем найти другой сериал')
+        res.appendBubble('У меня больше нет сериалов по этому запросу. Можем найти другой сериал')
         // res.appendSuggestions(['Найти другой сериал'])
         dispatch && dispatch(['searchTVShow'])
       }
@@ -109,8 +112,10 @@ export const userScenario = createUserScenario({
     handle: ({req, res}) => {
       if (req.request.payload.character.appeal === 'official') {
         res.setPronounceText(`Я могу порекомендовать сериал на основе ваших предпочтений. Можете сказать \"Порекомендуй сериал\", чтобы посмотреть рекомендации. Дальше можете сказать \"Не тот сериал\", если это не тот что вы искали или скажите \"Ещё\" для следующей рекомендации. Также можно узнать сколько всего рекомендаций сказав соответствующую фразу.`)
+        res.appendBubble(`Я могу порекомендовать сериал на основе ваших предпочтений. Можете сказать \"Порекомендуй сериал\", чтобы посмотреть рекомендации. Дальше можете сказать \"Не тот сериал\", если это не тот что вы искали или скажите \"Ещё\" для следующей рекомендации. Также можно узнать сколько всего рекомендаций сказав соответствующую фразу.`)
       } else {
         res.setPronounceText(`Я могу порекомендовать сериал на основе твоих предпочтений. Можешь сказать \"Порекомендуй сериал\", чтобы посмотреть рекомендации. Дальше можешь сказать \"Не тот сериал\", если это не тот что ты искал или скажи \"Ещё\" для следующей рекомендации. Также можно узнать сколько всего рекомендаций сказав соответствующую фразу.`)
+        res.appendBubble(`Я могу порекомендовать сериал на основе твоих предпочтений. Можешь сказать \"Порекомендуй сериал\", чтобы посмотреть рекомендации. Дальше можешь сказать \"Не тот сериал\", если это не тот что ты искал или скажи \"Ещё\" для следующей рекомендации. Также можно узнать сколько всего рекомендаций сказав соответствующую фразу.`)
       }
       res.appendSuggestions(['Порекомендуй сериал'])
     }
