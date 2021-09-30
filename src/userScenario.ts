@@ -3,7 +3,8 @@ import MovieDB from 'node-themoviedb';
 import model from './intents.json'
 import { recommendTVShows, getGenres, findTVShow } from './movieApi';
 import { tvShowsSuggestions } from './utils/constants';
-import { createMovieCard, sendNewTVShow, sendFirstRecommendation, getRandomFromArray } from './utils/utils';
+import { sendFirstRecommendation, sendNewTVShow } from './utils/handleHelpers';
+import { fixPluralization, getRandomFromArray } from './utils/utils';
 require('dotenv').config()
 export const intents = createIntents(model.intents)
 const { action, regexp, intent, text } = createMatchers<SaluteRequest , typeof intents>();
@@ -44,7 +45,7 @@ export const goToNewTVShowHandler: SaluteHandler = ({req, res, session}, dispatc
 
 export const howManyRecommendationsHandler: SaluteHandler = ({res, session}) => {
   const { recommendations, userTVShow } = session as { recommendations: MovieDB.Responses.TV.GetRecommendations, userTVShow: string }
-  res.setPronounceText(`Всего ${recommendations.results.length} рекомендаций.`)
+  res.setPronounceText(fixPluralization(`Всего ${recommendations.results.length} рекомендаций.`))
   res.appendSuggestions(['Найти другой сериал', 'Ещё'])
 }
 
